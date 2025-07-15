@@ -165,7 +165,6 @@ export function useEmergencySystem() {
           ? `https://maps.google.com/?q=${event.location.latitude},${event.location.longitude}`
           : 'Location unavailable';
 
-        const message = `🚨 EMERGENCY ALERT from Zicom Safety 🚨\n\n${contact.name} may need immediate assistance.\n\nTime: ${event.timestamp.toLocaleString()}\nLocation: ${locationText}\n\nThis is an automated emergency message. Please check on them immediately or contact emergency services if needed.`;
         const message = `🚨 EMERGENCY ALERT from Zicom Safety 🚨\n\n${userName} may need immediate assistance.\n\nTime: ${event.timestamp.toLocaleString()}\nLocation: ${locationText}\n\nThis is an automated emergency message. Please check on them immediately or contact emergency services if needed.`;
 
         if (Platform.OS === 'web') {
