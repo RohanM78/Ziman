@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { EmergencyEvent, EmergencyContact } from '@/types/safety';
 import { supabaseService } from '@/services/supabaseService';
 import { useSupabaseAuth } from './useSupabaseAuth';
+import { supabase } from '@/config/supabase';
 
 export function useEmergencySystem() {
   const [isEmergencyActive, setIsEmergencyActive] = useState(false);
@@ -28,8 +29,29 @@ export function useEmergencySystem() {
       // Ensure user is authenticated
       await ensureAuthenticated();
 
+      // Fetch user profile information for contact details
+      setEmergencyProgress(15);
+      let userName: string | undefined;
+      let userPhone: string | undefined;
+      
+      try {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('phone_number')
+          .single();
+        
+        userPhone = profile?.phone_number || undefined;
+        
+        // Get user name from auth metadata or email
+        const { data: { user } } = await supabase.auth.getUser();
+        userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || undefined;
+      } catch (error) {
+        console.warn('Failed to fetch user profile:', error);
+        // Continue with emergency even if profile fetch fails
+      }
+
       // Get current location
-      setEmergencyProgress(20);
+      setEmergencyProgress(25);
       let location;
       try {
         const locationResult = await Location.getCurrentPositionAsync({
@@ -45,8 +67,13 @@ export function useEmergencySystem() {
       }
 
       // Create emergency record in Supabase
-      setEmergencyProgress(30);
-      const recordId = await supabaseService.createEmergencyRecord(location, contacts);
+      setEmergencyProgress(35);
+      const recordId = await supabaseService.createEmergencyRecord(
+        location, 
+        contacts, 
+        userName, 
+        userPhone
+      );
 
       // Create emergency event
       const event: EmergencyEvent = {
@@ -59,13 +86,13 @@ export function useEmergencySystem() {
       };
 
       setEmergencyEvent(event);
-      setEmergencyProgress(40);
+      setEmergencyProgress(45);
 
       // Media capture will be handled by EmergencyRecorder component
       // This allows for real-time progress updates
 
       // Send SMS alerts to emergency contacts
-      setEmergencyProgress(80);
+      setEmergencyProgress(85);
       await notifyEmergencyContacts(contacts, event);
 
       // Mark event as completed
@@ -123,6 +150,15 @@ export function useEmergencySystem() {
   }, [emergencyEvent]);
 
   const notifyEmergencyContacts = async (contacts: EmergencyContact[], event: EmergencyEvent) => {
+    // Get user info for emergency message
+    let userName = 'A Zicom user';
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'A Zicom user';
+    } catch (error) {
+      console.warn('Failed to get user name for emergency message:', error);
+    }
+
     for (const contact of contacts) {
       try {
         const locationText = event.location 
@@ -130,6 +166,7 @@ export function useEmergencySystem() {
           : 'Location unavailable';
 
         const message = `🚨 EMERGENCY ALERT from Zicom Safety 🚨\n\n${contact.name} may need immediate assistance.\n\nTime: ${event.timestamp.toLocaleString()}\nLocation: ${locationText}\n\nThis is an automated emergency message. Please check on them immediately or contact emergency services if needed.`;
+        const message = `🚨 EMERGENCY ALERT from Zicom Safety 🚨\n\n${userName} may need immediate assistance.\n\nTime: ${event.timestamp.toLocaleString()}\nLocation: ${locationText}\n\nThis is an automated emergency message. Please check on them immediately or contact emergency services if needed.`;
 
         if (Platform.OS === 'web') {
           // Web: Use API route for SMS

@@ -5,6 +5,8 @@ import * as FileSystem from 'expo-file-system';
 export interface EmergencyRecord {
   id?: string;
   user_id: string;
+  user_name?: string;
+  user_phone?: string;
   timestamp: string;
   file_url: string;
   location?: {
@@ -74,7 +76,9 @@ class SupabaseService {
   // Emergency Recording Methods
   async createEmergencyRecord(
     location?: { latitude: number; longitude: number },
-    emergencyContacts: Array<{ name: string; phone: string; relationship: string }> = []
+    emergencyContacts: Array<{ name: string; phone: string; relationship: string }> = [],
+    userName?: string,
+    userPhone?: string
   ): Promise<string> {
     try {
       const user = await this.getCurrentUser();
@@ -84,6 +88,8 @@ class SupabaseService {
 
       const emergencyData: Omit<EmergencyRecord, 'id'> = {
         user_id: user.id,
+        user_name: userName || null,
+        user_phone: userPhone || null,
         timestamp: new Date().toISOString(),
         file_url: '', // Will be updated after file upload
         location,
