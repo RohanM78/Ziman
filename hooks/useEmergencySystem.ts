@@ -37,17 +37,32 @@ export function useEmergencySystem() {
       try {
         const { data: profile } = await supabase
           .from('user_profiles')
-          .select('phone_number')
+          .select('full_name, phone_number')
           .single();
         
+        userName = profile?.full_name || undefined;
         userPhone = profile?.phone_number || undefined;
-        
-        // Get user name from auth metadata or email
-        const { data: { user } } = await supabase.auth.getUser();
-        userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || undefined;
       } catch (error) {
         console.warn('Failed to fetch user profile:', error);
-        // Continue with emergency even if profile fetch fails
+        
+        // Fallback: try to get name from auth metadata
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || undefined;
+        } catch (authError) {
+          console.warn('Failed to get user from auth:', authError);
+        }
+      }
+      
+      // Additional fallback for userName if still undefined
+      if (!userName) {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          userName = user?.email?.split('@')[0] || 'Zicom User';
+        } catch (error) {
+          userName = 'Zicom User';
+        }
+      } catch (error) {
       }
 
       // Get current location

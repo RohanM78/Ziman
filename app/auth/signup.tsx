@@ -12,10 +12,12 @@ import {
   ScrollView,
 } from 'react-native';
 import { router } from 'expo-router';
-import { Shield, Mail, Lock, Eye, EyeOff, ArrowLeft, UserPlus } from 'lucide-react-native';
+import { Shield, Mail, Lock, Eye, EyeOff, ArrowLeft, UserPlus, User, Phone } from 'lucide-react-native';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 
 interface FormErrors {
+  fullName?: string;
+  phoneNumber?: string;
   email?: string;
   password?: string;
   confirmPassword?: string;
@@ -24,6 +26,8 @@ interface FormErrors {
 export default function SignUpScreen() {
   const { signUp, isLoading } = useSupabaseAuth();
   const [formData, setFormData] = useState({
+    fullName: '',
+    phoneNumber: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -34,6 +38,24 @@ export default function SignUpScreen() {
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
+
+    // Full name validation
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Full name is required';
+    } else if (formData.fullName.trim().length < 2) {
+      newErrors.fullName = 'Full name must be at least 2 characters';
+    }
+
+    // Phone number validation
+    if (!formData.phoneNumber.trim()) {
+      newErrors.phoneNumber = 'Phone number is required';
+    } else {
+      // Remove all non-digit characters for validation
+      const digitsOnly = formData.phoneNumber.replace(/\D/g, '');
+      if (digitsOnly.length < 10 || digitsOnly.length > 15) {
+        newErrors.phoneNumber = 'Please enter a valid phone number';
+      }
+    }
 
     // Email validation
     if (!formData.email.trim()) {
@@ -64,10 +86,10 @@ export default function SignUpScreen() {
     if (!validateForm()) return;
 
     try {
-      await signUp(formData.email.trim(), formData.password);
+      await signUp(formData.email.trim(), formData.password, formData.fullName.trim(), formData.phoneNumber.trim());
       Alert.alert(
         'Account Created Successfully!',
-        'Please check your email for a verification link before signing in.',
+        'Your account has been created successfully. You can now sign in.',
         [
           {
             text: 'OK',
@@ -124,6 +146,40 @@ export default function SignUpScreen() {
           </View>
 
           <View style={styles.form}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Full Name</Text>
+              <View style={[styles.inputContainer, errors.fullName && styles.inputError]}>
+                <User size={20} color="#666666" strokeWidth={2} />
+                <TextInput
+                  style={styles.textInput}
+                  value={formData.fullName}
+                  onChangeText={(text) => updateFormData('fullName', text)}
+                  placeholder="Enter your full name"
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                  autoComplete="name"
+                />
+              </View>
+              {errors.fullName && <Text style={styles.errorText}>{errors.fullName}</Text>}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Phone Number</Text>
+              <View style={[styles.inputContainer, errors.phoneNumber && styles.inputError]}>
+                <Phone size={20} color="#666666" strokeWidth={2} />
+                <TextInput
+                  style={styles.textInput}
+                  value={formData.phoneNumber}
+                  onChangeText={(text) => updateFormData('phoneNumber', text)}
+                  placeholder="Enter your phone number"
+                  keyboardType="phone-pad"
+                  autoCorrect={false}
+                  autoComplete="tel"
+                />
+              </View>
+              {errors.phoneNumber && <Text style={styles.errorText}>{errors.phoneNumber}</Text>}
+            </View>
+
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Email Address</Text>
               <View style={[styles.inputContainer, errors.email && styles.inputError]}>

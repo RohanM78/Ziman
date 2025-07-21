@@ -52,14 +52,42 @@ export function useSupabaseAuth() {
   }, []);
 
   const signUp = async (email: string, password: string) => {
+  }
+  const signUp = async (email: string, password: string, fullName: string, phoneNumber: string) => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
       });
       
       if (error) throw error;
+      
+      // Create user profile with name and phone number
+      if (data.user) {
+        try {
+          const { error: profileError } = await supabase
+            .from('user_profiles')
+            .insert({
+              user_id: data.user.id,
+              full_name: fullName,
+              phone_number: phoneNumber,
+            });
+          
+          if (profileError) {
+            console.error('Failed to create user profile:', profileError);
+            // Don't throw error here - auth was successful, profile creation is secondary
+          }
+        } catch (profileError) {
+          console.error('Error creating user profile:', profileError);
+        }
+      }
+      
       return data;
     } catch (error) {
       console.error('Sign up error:', error);
