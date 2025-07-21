@@ -62,8 +62,6 @@ export function useEmergencySystem() {
         } catch (error) {
           userName = 'Zicom User';
         }
-      } catch (error) {
-      }
 
       // Get current location
       setEmergencyProgress(25);
