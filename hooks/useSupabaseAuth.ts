@@ -51,8 +51,6 @@ export function useSupabaseAuth() {
     };
   }, []);
 
-  const signUp = async (email: string, password: string) => {
-  }
   const signUp = async (email: string, password: string, fullName: string, phoneNumber: string) => {
     try {
       setIsLoading(true);
