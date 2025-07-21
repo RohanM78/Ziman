@@ -29,6 +29,8 @@ export interface AuthState {
 export interface SignUpData {
   email: string;
   password: string;
+  fullName: string;
+  phoneNumber: string;
 }
 
 export interface SignInData {

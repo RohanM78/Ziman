@@ -28,6 +28,34 @@ export const validatePassword = (password: string): { isValid: boolean; error?: 
   return { isValid: true };
 };
 
+export const validateFullName = (fullName: string): { isValid: boolean; error?: string } => {
+  if (!fullName.trim()) {
+    return { isValid: false, error: 'Full name is required' };
+  }
+  
+  if (fullName.trim().length < 2) {
+    return { isValid: false, error: 'Full name must be at least 2 characters' };
+  }
+  
+  return { isValid: true };
+};
+
+export const validatePhoneNumber = (phoneNumber: string): { isValid: boolean; error?: string } => {
+  if (!phoneNumber || !phoneNumber.trim()) {
+    return { isValid: false, error: 'Phone number is required' };
+  }
+  
+  // Remove all non-digit characters for validation
+  const digitsOnly = phoneNumber.replace(/\D/g, '');
+  
+  // Check if it's a valid US phone number (10 digits)
+  if (digitsOnly.length !== 10) {
+    return { isValid: false, error: 'Please enter a valid 10-digit phone number' };
+  }
+  
+  return { isValid: true };
+};
+
 export const validatePasswordConfirmation = (
   password: string,
   confirmPassword: string
@@ -46,7 +74,9 @@ export const validatePasswordConfirmation = (
 export const validateSignUpForm = (
   email: string,
   password: string,
-  confirmPassword: string
+  confirmPassword: string,
+  fullName: string,
+  phoneNumber: string
 ): ValidationResult => {
   const errors: Record<string, string> = {};
   
@@ -63,6 +93,16 @@ export const validateSignUpForm = (
   const confirmPasswordValidation = validatePasswordConfirmation(password, confirmPassword);
   if (!confirmPasswordValidation.isValid) {
     errors.confirmPassword = confirmPasswordValidation.error!;
+  }
+  
+  const fullNameValidation = validateFullName(fullName);
+  if (!fullNameValidation.isValid) {
+    errors.fullName = fullNameValidation.error!;
+  }
+  
+  const phoneNumberValidation = validatePhoneNumber(phoneNumber);
+  if (!phoneNumberValidation.isValid) {
+    errors.phoneNumber = phoneNumberValidation.error!;
   }
   
   return {
