@@ -29,7 +29,7 @@ export default function OnboardingPermissions() {
       id: 'location',
       icon: MapPin,
       title: 'Location Services',
-      description: 'Required to share your precise location during emergencies',
+      description: '',
       granted: permissions.location,
       request: requestLocationPermission,
       critical: true,
