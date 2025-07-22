@@ -233,4 +233,3 @@ const styles = StyleSheet.create({
   },
 });
 
-why is my page looking cramped? The create account and sign in buttons are overlapping over the text "get started in seconds"  and "new to zicom? get started" and the privacy policy and already have an account bit. we should ideally change this such that the get started in seconds comes above the crate account sign in buttons, and the rest of the text gets pushed below. the screen would become larger and a scroll option would also then be available
