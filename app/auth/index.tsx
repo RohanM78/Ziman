@@ -200,8 +200,8 @@ const styles = StyleSheet.create({
   signInButton: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    paddingVertical: 20,
-    paddingHorizontal: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     alignItems: 'center',
     borderWidth: 2,
     borderColor: '#ad2831',
