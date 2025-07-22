@@ -7,7 +7,7 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
-import { Camera, CameraType } from 'expo-camera';
+import { CameraView, CameraType } from 'expo-camera';
 import { Video, Upload, CircleAlert as AlertCircle, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { supabaseService } from '@/services/supabaseService';
 import Animated, {
@@ -17,7 +17,6 @@ import Animated, {
   withTiming,
   withSequence,
 } from 'react-native-reanimated';
-import * as FileSystem from 'expo-file-system';
 
 const { width } = Dimensions.get('window');
 
@@ -54,7 +53,7 @@ export function EmergencyRecorder({
   });
 
   // Refs for camera and timers
-  const cameraRef = useRef<Camera | null>(null);
+  const cameraRef = useRef<CameraView | null>(null);
   const recordingTimer = useRef<NodeJS.Timeout | null>(null);
   const progressTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -200,41 +199,27 @@ export function EmergencyRecorder({
   /**
    * Record video using Expo Camera (Native platforms)
    */
-const recordVideoNative = async (): Promise<string> => {
-  if (!cameraRef.current) {
-    throw new Error('Camera reference not available');
-  }
-  // Only use maxDuration
-  const video = await cameraRef.current.recordAsync({
-    maxDuration: 10,
-    quality: '720p',
-  });
-  return video.uri;
-};
+  const recordVideoNative = async (): Promise<string> => {
+    if (!cameraRef.current) {
+      throw new Error('Camera reference not available');
+    }
 
-    // 2. Set a timeout to explicitly stop the recording after 10 seconds.
-    // This action will cause the recordingPromise to resolve.
+    // Start recording with 10-second limit
+    const video = await cameraRef.current.recordAsync({
+      maxDuration: 10,
+      quality: '720p',
+    });
+
+    // Set timeout to stop recording after 10 seconds
     recordingTimer.current = setTimeout(async () => {
       try {
-        // Ensure cameraRef.current exists and recording is still active before stopping
-        if (cameraRef.current && state.isRecording) {
+        if (cameraRef.current) {
           await cameraRef.current.stopRecording();
         }
       } catch (error) {
         console.warn('Error stopping recording:', error);
       }
     }, 10000);
-
-    // 3. Await the promise returned by recordAsync. This will only resolve
-    // once stopRecording() has been called (either by our timeout or maxDuration).
-    const video = await recordingPromise;
-
-    // Clean up the timer immediately after the recording promise resolves
-    // to prevent it from firing if the recording stopped earlier.
-    if (recordingTimer.current) {
-      clearTimeout(recordingTimer.current);
-      recordingTimer.current = null;
-    }
 
     return video.uri;
   };
@@ -299,20 +284,16 @@ const recordVideoNative = async (): Promise<string> => {
    */
   const uploadRecording = async (videoUri: string): Promise<string> => {
     try {
-const fixedUri = Platform.OS !== 'web' && !videoUri.startsWith('file://')
-  ? `file://${videoUri}`
-  : videoUri;
-
-const downloadURL = await supabaseService.uploadRecording(
-  recordId,
-  fixedUri,
-  (progress) => {
-    setState(prev => ({ 
-      ...prev, 
-      uploadProgress: progress.percentage 
-    }));
-  }
-);
+      const downloadURL = await supabaseService.uploadRecording(
+        recordId,
+        videoUri,
+        (progress) => {
+          setState(prev => ({ 
+            ...prev, 
+            uploadProgress: progress.percentage 
+          }));
+        }
+      );
 
       return downloadURL;
     } catch (error) {
@@ -442,16 +423,6 @@ const downloadURL = await supabaseService.uploadRecording(
     </View>
   );
 }
-
-
-
-
-
-
-
-
-
-
 
 const styles = StyleSheet.create({
   container: {
