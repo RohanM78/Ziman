@@ -12,6 +12,7 @@ import {
   Platform
 } from 'react-native';
 import { Settings, Shield, Smartphone, MapPin, Bell, Camera, Mic, Users, CircleHelp as HelpCircle, ExternalLink, ChevronRight, CircleCheck as CheckCircle, Circle as XCircle } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
