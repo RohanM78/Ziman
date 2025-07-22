@@ -274,8 +274,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    minHeight: '100%',
-    paddingBottom: 120,
+    // Remove minHeight: '100%' - this was forcing content into viewport
+    paddingBottom: 200, // Increased from 120 to give more space
     paddingTop: 64,
     paddingHorizontal: 32,
     justifyContent: 'flex-start',
@@ -392,5 +392,36 @@ const styles = StyleSheet.create({
     padding: 20,
     borderLeftWidth: 4,
     borderLeftColor: '#ad2831',
+  },
+  // Add these new styles for better organization
+  getStartedSection: {
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '100%',
+  },
+  getStartedText: {
+    fontSize: 18,
+    fontFamily: 'Inter-SemiBold',
+    color: '#250902',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center',
+    rowGap: 15,
+    marginBottom: 30,
+  },
+  footerSection: {
+    alignItems: 'center',
+    width: '100%',
+    paddingTop: 20,
+  },
+  footerText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#666666',
+    textAlign: 'center',
+    marginBottom: 15,
   },
 });
