@@ -60,10 +60,6 @@ export default function OnboardingWelcome() {
 
         <View style={styles.messageSection}>
           <Text style={styles.welcomeTitle}>Welcome to Your Safety Network</Text>
-          <Text style={styles.welcomeDescription}>
-            Zicom is designed to keep you safe during emergencies. With instant alerts, 
-            location sharing, and evidence capture, help is always within reach.
-          </Text>
           
           <View style={styles.featureList}>
             <View style={styles.featureItem}>
