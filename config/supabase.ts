@@ -16,5 +16,5 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false,
   },
 });
-
+//Rohan
 export default supabase;
