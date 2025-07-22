@@ -204,22 +204,35 @@ export function EmergencyRecorder({
       throw new Error('Camera reference not available');
     }
 
-    // Start recording with 10-second limit
-    const video = await cameraRef.current.recordAsync({
-      maxDuration: 10,
+    // 1. Start recording and store the promise. Do NOT await it yet.
+    const recordingPromise = cameraRef.current.recordAsync({
       quality: '720p',
+      maxDuration: 10, // Fallback safety limit
     });
 
-    // Set timeout to stop recording after 10 seconds
+    // 2. Set a timeout to explicitly stop the recording after 10 seconds.
+    // This action will cause the recordingPromise to resolve.
     recordingTimer.current = setTimeout(async () => {
       try {
-        if (cameraRef.current) {
+        // Ensure cameraRef.current exists and recording is still active before stopping
+        if (cameraRef.current && state.isRecording) {
           await cameraRef.current.stopRecording();
         }
       } catch (error) {
         console.warn('Error stopping recording:', error);
       }
     }, 10000);
+
+    // 3. Await the promise returned by recordAsync. This will only resolve
+    // once stopRecording() has been called (either by our timeout or maxDuration).
+    const video = await recordingPromise;
+
+    // Clean up the timer immediately after the recording promise resolves
+    // to prevent it from firing if the recording stopped earlier.
+    if (recordingTimer.current) {
+      clearTimeout(recordingTimer.current);
+      recordingTimer.current = null;
+    }
 
     return video.uri;
   };
