@@ -257,7 +257,7 @@ export default function SettingsScreen() {
             title="Emergency Contacts"
             description={`${settings.emergencyContacts.length} of 3 contacts configured`}
             type="button"
-            onPress={() => {}} // Navigate to contacts tab
+            onPress={() => router.push('/contacts')}
           />
         </View>
 
