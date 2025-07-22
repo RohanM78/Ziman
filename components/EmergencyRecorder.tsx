@@ -7,7 +7,7 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
-import { CameraView, CameraType } from 'expo-camera';
+import { Camera, CameraType } from 'expo-camera';
 import { Video, Upload, CircleAlert as AlertCircle, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { supabaseService } from '@/services/supabaseService';
 import Animated, {
@@ -54,7 +54,7 @@ export function EmergencyRecorder({
   });
 
   // Refs for camera and timers
-  const cameraRef = useRef<CameraView | null>(null);
+  const cameraRef = useRef<Camera | null>(null);
   const recordingTimer = useRef<NodeJS.Timeout | null>(null);
   const progressTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -200,16 +200,17 @@ export function EmergencyRecorder({
   /**
    * Record video using Expo Camera (Native platforms)
    */
-  const recordVideoNative = async (): Promise<string> => {
-    if (!cameraRef.current) {
-      throw new Error('Camera reference not available');
-    }
-
-    // 1. Start recording and store the promise. Do NOT await it yet.
-    const recordingPromise = cameraRef.current.recordAsync({
-      quality: '720p',
-      maxDuration: 10, // Fallback safety limit
-    });
+const recordVideoNative = async (): Promise<string> => {
+  if (!cameraRef.current) {
+    throw new Error('Camera reference not available');
+  }
+  // Only use maxDuration
+  const video = await cameraRef.current.recordAsync({
+    maxDuration: 10,
+    quality: '720p',
+  });
+  return video.uri;
+};
 
     // 2. Set a timeout to explicitly stop the recording after 10 seconds.
     // This action will cause the recordingPromise to resolve.
