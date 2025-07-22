@@ -45,24 +45,38 @@ export function useEmergencySystem() {
       } catch (error) {
         console.warn('Failed to fetch user profile:', error);
         
-        // Fallback: try to get name from auth metadata
-        try {
-          const { data: { user } } = await supabase.auth.getUser();
-          userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || undefined;
-        } catch (authError) {
-          console.warn('Failed to get user from auth:', authError);
-        }
-      }
-      
-      // Additional fallback for userName if still undefined
-      if (!userName) {
-        try {
-          const { data: { user } } = await supabase.auth.getUser();
-          userName = user?.email?.split('@')[0] || 'Zicom User';
-        } catch (error) {
-          userName = 'Zicom User';
-        }
-      }
+    try {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    console.warn('Failed to fetch authenticated user:', userError);
+    return;
+  }
+
+  const userName =
+    user.user_metadata?.full_name ||
+    user.email?.split('@')[0] ||
+    'Zicom User';
+
+  const phoneNumber =
+    user.user_metadata?.phone ||
+    null;
+
+  const { error: profileError } = await supabase
+    .from('user_profiles')
+    .upsert({
+      user_id: user.id,
+      full_name: userName,
+      phone_number: phoneNumber,
+    });
+
+  if (profileError) {
+    console.error('Failed to upsert user profile:', profileError);
+  }
+} catch (error) {
+  console.error('Error syncing user metadata to profile:', error);
+}
+
 
       // Get current location
       setEmergencyProgress(25);
