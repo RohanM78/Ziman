@@ -1,103 +1,265 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  Pressable,
   StyleSheet,
   SafeAreaView,
-  Dimensions,
+  ScrollView,
+  Alert,
+  Platform,
+  Modal,
 } from 'react-native';
 import { router } from 'expo-router';
-import { Shield, UserPlus, LogIn } from 'lucide-react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  withSequence,
-} from 'react-native-reanimated';
-import { useEffect } from 'react';
+import { SafetyButton } from '@/components/SafetyButton';
+import { StatusIndicator } from '@/components/StatusIndicator';
+import { EmergencyRecorder } from '@/components/EmergencyRecorder';
+import { useAppSettings } from '@/hooks/useAppSettings';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useEmergencySystem } from '@/hooks/useEmergencySystem';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 
-const { width, height } = Dimensions.get('window');
+export default function HomeScreen() {
+  const { settings, isLoading } = useAppSettings();
+  const { permissions } = usePermissions();
+  const { 
+    isEmergencyActive, 
+    emergencyEvent,
+    emergencyProgress,
+    triggerEmergency, 
+    cancelEmergency,
+    handleRecordingComplete 
+  } = useEmergencySystem();
+  const { isAuthenticated, ensureAuthenticated } = useSupabaseAuth();
+  const [cancelTimer, setCancelTimer] = useState<number | null>(null);
+  const [showRecorder, setShowRecorder] = useState(false);
 
-export default function AuthLandingScreen() {
-  const pulseScale = useSharedValue(1);
-  const opacity = useSharedValue(0);
-
+  // Redirect to onboarding if first launch
   useEffect(() => {
-    // Fade in animation
-    opacity.value = withTiming(1, { duration: 1000 });
-    
-    // Pulsing shield animation
-    pulseScale.value = withRepeat(
-      withSequence(
-        withTiming(1.1, { duration: 2000 }),
-        withTiming(1, { duration: 2000 })
-      ),
-      -1,
-      false
+    if (!isLoading && settings.isFirstLaunch) {
+      router.replace('/onboarding');
+    }
+  }, [isLoading, settings.isFirstLaunch]);
+
+  // Show recorder when emergency is active
+  useEffect(() => {
+    if (isEmergencyActive && emergencyEvent) {
+      setShowRecorder(true);
+    } else {
+      setShowRecorder(false);
+    }
+  }, [isEmergencyActive, emergencyEvent]);
+
+  const handleEmergencyActivation = () => {
+    if (isEmergencyActive) {
+      // Cancel emergency
+      cancelEmergency();
+      if (cancelTimer) {
+        clearTimeout(cancelTimer);
+        setCancelTimer(null);
+      }
+      return;
+    }
+
+    // Immediate activation for emergency recording
+    activateEmergency();
+  };
+
+  const activateEmergency = async () => {
+    if (settings.emergencyContacts.length === 0) {
+      Alert.alert(
+        'No Emergency Contacts',
+        'Please add emergency contacts before activating the safety protocol.',
+        [
+          { text: 'OK' },
+          {
+            text: 'Add Contacts',
+            onPress: () => router.push('/(tabs)/contacts'),
+          },
+        ]
+      );
+      return;
+    }
+
+    // Ensure Supabase authentication before triggering emergency
+    try {
+      await ensureAuthenticated();
+      await triggerEmergency(settings.emergencyContacts);
+    } catch (error) {
+      console.error('Failed to activate emergency:', error);
+      Alert.alert(
+        'Emergency Activation Failed',
+        'Failed to activate emergency protocol. Please try again or call emergency services directly.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  const handleRecordingError = (error: string) => {
+    Alert.alert('Recording Error', error);
+  };
+
+  const getSystemStatus = () => {
+    return {
+      location: permissions.location,
+      camera: permissions.camera,
+      microphone: permissions.microphone,
+      contacts: settings.emergencyContacts.length > 0,
+      backgroundApp: Platform.OS !== 'web',
+      firebase: isAuthenticated,
+    };
+  };
+
+  const systemStatus = getSystemStatus();
+  const criticalIssues = Object.values(systemStatus).filter(
+    (status) => !status
+  ).length;
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading Zicom...</Text>
+        </View>
+      </SafeAreaView>
     );
-  }, []);
-
-  const animatedShieldStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulseScale.value }],
-  }));
-
-  const animatedContainerStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-  }));
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <Animated.View style={[styles.content, animatedContainerStyle]}>
-        <View style={styles.logoSection}>
-          <Animated.View style={[styles.logoContainer, animatedShieldStyle]}>
-            <Shield size={120} color="#ad2831" strokeWidth={2} />
-          </Animated.View>
-          <Text style={styles.appName}>Zicom</Text>
-          <Text style={styles.tagline}>Personal Safety Guardian</Text>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Text style={styles.appTitle}>Zicom</Text>
+          <Text style={styles.subtitle}>Personal Safety Guardian</Text>
+          {criticalIssues > 0 && (
+            <View style={styles.warningBanner}>
+              <Text style={styles.warningText}>
+                {criticalIssues} system issue{criticalIssues > 1 ? 's' : ''}{' '}
+                detected
+              </Text>
+            </View>
+          )}
         </View>
 
-        <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeTitle}>Welcome to Your Safety Network</Text>
-          <Text style={styles.welcomeDescription}>
-            Join thousands of users who trust Zicom to keep them safe during emergencies.
-            Get started in seconds.
+        <View style={styles.emergencySection}>
+          <SafetyButton
+            isActive={isEmergencyActive}
+            onPress={handleEmergencyActivation}
+            disabled={criticalIssues > 2 || !isAuthenticated}
+          />
+
+          {isEmergencyActive && (
+            <View style={styles.activeAlert}>
+              <Text style={styles.activeAlertText}>
+                🚨 EMERGENCY PROTOCOL ACTIVE
+              </Text>
+              <Text style={styles.activeAlertSubtext}>
+                Recording evidence and notifying contacts...
+              </Text>
+              <View style={styles.progressContainer}>
+                <View style={styles.progressBar}>
+                  <View 
+                    style={[styles.progressFill, { width: ${emergencyProgress}% }]} 
+                  />
+                </View>
+                <Text style={styles.progressText}>{emergencyProgress}%</Text>
+              </View>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.statusSection}>
+          <Text style={styles.sectionTitle}>System Status</Text>
+
+          <StatusIndicator
+            label="Supabase Connection"
+            status={systemStatus.firebase ? 'active' : 'inactive'}
+            description={
+              systemStatus.firebase
+                ? 'Cloud storage ready'
+                : 'Connecting to cloud services...'
+            }
+          />
+
+          <StatusIndicator
+            label="Location Services"
+            status={systemStatus.location ? 'active' : 'inactive'}
+            description={
+              systemStatus.location
+                ? 'GPS location tracking enabled'
+                : 'Location access required'
+            }
+          />
+
+          <StatusIndicator
+            label="Camera Access"
+            status={systemStatus.camera ? 'active' : 'inactive'}
+            description={
+              systemStatus.camera
+                ? 'Photo/video capture ready'
+                : 'Camera permission needed'
+            }
+          />
+
+          <StatusIndicator
+            label="Microphone Access"
+            status={systemStatus.microphone ? 'active' : 'inactive'}
+            description={
+              systemStatus.microphone
+                ? 'Audio recording ready'
+                : 'Microphone permission needed'
+            }
+          />
+
+          <StatusIndicator
+            label="Emergency Contacts"
+            status={systemStatus.contacts ? 'active' : 'warning'}
+            description={
+              systemStatus.contacts
+                ? ${settings.emergencyContacts.length} contact${
+                    settings.emergencyContacts.length > 1 ? 's' : ''
+                  } configured
+                : 'Add emergency contacts'
+            }
+          />
+
+          <StatusIndicator
+            label="Background Monitoring"
+            status={systemStatus.backgroundApp ? 'active' : 'warning'}
+            description={
+              systemStatus.backgroundApp
+                ? 'App can run in background'
+                : 'Limited background support on web'
+            }
+          />
+        </View>
+
+        <View style={styles.quickActionsSection}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <Text style={styles.quickActionsText}>
+            Remember: Press your power button 4 times quickly to activate
+            emergency mode without opening the app.
           </Text>
         </View>
+      </ScrollView>
 
-        <View style={styles.authOptions}>
-          <Pressable
-            style={styles.signUpButton}
-            onPress={() => router.push('/auth/signup')}
-            accessible={true}
-            accessibilityLabel="Create new account"
-            accessibilityRole="button"
-          >
-            <UserPlus size={24} color="#FFFFFF" strokeWidth={2} />
-            <Text style={styles.signUpButtonText}>Create Account</Text>
-            <Text style={styles.signUpButtonSubtext}>New to Zicom? Get started</Text>
-          </Pressable>
-
-          <Pressable
-            style={styles.signInButton}
-            onPress={() => router.push('/auth/login')}
-            accessible={true}
-            accessibilityLabel="Sign in to existing account"
-            accessibilityRole="button"
-          >
-            <LogIn size={24} color="#ad2831" strokeWidth={2} />
-            <Text style={styles.signInButtonText}>Sign In</Text>
-            <Text style={styles.signInButtonSubtext}>Already have an account?</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            By continuing, you agree to our Terms of Service and Privacy Policy
-          </Text>
-        </View>
-      </Animated.View>
+      {/* Emergency Recording Modal */}
+      <Modal
+        visible={showRecorder}
+        animationType="slide"
+        presentationStyle="fullScreen"
+      >
+        {emergencyEvent && (
+          <EmergencyRecorder
+            recordId={emergencyEvent.id}
+            onRecordingComplete={handleRecordingComplete}
+            onError={handleRecordingError}
+          />
+        )}
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -107,137 +269,123 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAFAFA',
   },
-  content: {
+  scrollView: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 32,
   },
-  logoSection: {
-    alignItems: 'center',
-    marginTop: height * 0.08,
-    marginBottom: height * 0.06,
+  scrollContent: {
+    paddingBottom: 100,
   },
-  logoContainer: {
-    width: 160,
-    height: 160,
-    backgroundColor: '#FFEAEA',
-    borderRadius: 80,
+  loadingContainer: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24,
-    shadowColor: '#ad2831',
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 8,
   },
-  appName: {
-    fontSize: 48,
+  loadingText: {
+    fontSize: 18,
+    fontFamily: 'Inter-Medium',
+    color: '#666666',
+  },
+  header: {
+    alignItems: 'center',
+    paddingTop: 32,
+    paddingHorizontal: 24,
+    marginBottom: 32,
+  },
+  appTitle: {
+    fontSize: 32,
     fontFamily: 'Inter-Bold',
     color: '#250902',
     marginBottom: 8,
-    letterSpacing: -1,
   },
-  tagline: {
+  subtitle: {
     fontSize: 16,
     fontFamily: 'Inter-Medium',
     color: '#ad2831',
-    textAlign: 'center',
-  },
-  welcomeSection: {
-    alignItems: 'center',
-    marginBottom: height * 0.08,
-  },
-  welcomeTitle: {
-    fontSize: 28,
-    fontFamily: 'Inter-Bold',
-    color: '#250902',
-    textAlign: 'center',
     marginBottom: 16,
-    lineHeight: 34,
   },
-  welcomeDescription: {
-    fontSize: 16,
-    fontFamily: 'Inter-Regular',
-    color: '#666666',
-    textAlign: 'center',
-    lineHeight: 24,
+  warningBanner: {
+    backgroundColor: '#FF9800',
+    borderRadius: 8,
+    paddingVertical: 8,
     paddingHorizontal: 16,
+    marginTop: 8,
   },
-  authOptions: {
-    flex: 1,
-    justifyContent: 'center',
-    gap: 16,
+  warningText: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+    color: '#FFFFFF',
+    textAlign: 'center',
   },
-  signUpButton: {
+  emergencySection: {
+    alignItems: 'center',
+    marginBottom: 48,
+  },
+  activeAlert: {
     backgroundColor: '#ad2831',
     borderRadius: 16,
-    paddingVertical: 20,
-    paddingHorizontal: 24,
+    padding: 20,
+    marginTop: 24,
+    marginHorizontal: 24,
     alignItems: 'center',
-    shadowColor: '#ad2831',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
   },
-  signUpButtonText: {
+  activeAlertText: {
     fontSize: 18,
-    fontFamily: 'Inter-SemiBold',
+    fontFamily: 'Inter-Bold',
     color: '#FFFFFF',
-    marginTop: 8,
+    textAlign: 'center',
+    marginBottom: 4,
   },
-  signUpButtonSubtext: {
+  activeAlertSubtext: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#FFFFFF',
-    opacity: 0.9,
-    marginTop: 4,
+    textAlign: 'center',
+    marginBottom: 16,
   },
-  signInButton: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingVertical: 20,
-    paddingHorizontal: 24,
+  progressContainer: {
+    width: '100%',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#ad2831',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
-  signInButtonText: {
-    fontSize: 18,
+  progressBar: {
+    width: '100%',
+    height: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 3,
+    marginBottom: 8,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 3,
+  },
+  progressText: {
+    fontSize: 14,
     fontFamily: 'Inter-SemiBold',
-    color: '#ad2831',
-    marginTop: 8,
+    color: '#FFFFFF',
   },
-  signInButtonSubtext: {
+  statusSection: {
+    paddingHorizontal: 24,
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontFamily: 'Inter-Bold',
+    color: '#250902',
+    marginBottom: 16,
+  },
+  quickActionsSection: {
+    paddingHorizontal: 24,
+    marginBottom: 32,
+  },
+  quickActionsText: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#666666',
-    marginTop: 4,
-  },
-  footer: {
-    alignItems: 'center',
-    paddingTop: 24,
-  },
-  footerText: {
-    fontSize: 12,
-    fontFamily: 'Inter-Regular',
-    color: '#999999',
-    textAlign: 'center',
-    lineHeight: 18,
+    lineHeight: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: '#ad2831',
   },
 });
