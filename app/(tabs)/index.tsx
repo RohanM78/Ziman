@@ -273,13 +273,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 200,
-    paddingTop: 64,
-    paddingHorizontal: 32,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    rowGap: 40,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 120,
+    backgroundColor: '#FAFAFA',
   },
   loadingContainer: {
     flex: 1,
@@ -292,8 +289,13 @@ const styles = StyleSheet.create({
     color: '#666666',
   },
   header: {
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 24,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
     alignItems: 'center',
-    marginBottom: 20,
   },
   appTitle: {
     fontSize: 36,
@@ -323,7 +325,6 @@ const styles = StyleSheet.create({
   emergencySection: {
     alignItems: 'center',
     marginBottom: 48,
-    rowGap: 20,
   },
   activeAlert: {
     backgroundColor: '#ad2831',
@@ -331,6 +332,7 @@ const styles = StyleSheet.create({
     padding: 24,
     marginHorizontal: 16,
     alignItems: 'center',
+    marginTop: 20,
   },
   activeAlertText: {
     fontSize: 20,
@@ -368,8 +370,8 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   statusSection: {
-    paddingVertical: 36,
-    width: '100%',
+    paddingTop: 32,
+    paddingBottom: 24,
   },
   sectionTitle: {
     fontSize: 22,
@@ -378,8 +380,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   quickActionsSection: {
-    width: '100%',
-    marginBottom: 60,
+    marginBottom: 32,
   },
   quickActionsText: {
     fontSize: 14,
@@ -392,31 +393,34 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: '#ad2831',
   },
+  getStartedSection: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
   getStartedText: {
     fontSize: 16,
     fontFamily: 'Inter-Regular',
     color: '#666666',
     textAlign: 'center',
-    marginBottom: 24,
     paddingHorizontal: 12,
   },
   buttonContainer: {
-    width: '100%',
+    marginTop: 8,
+    marginBottom: 40,
     alignItems: 'center',
     rowGap: 16,
-    marginBottom: 32,
   },
   footerSection: {
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 16,
     paddingTop: 20,
+    paddingBottom: 40,
+    alignItems: 'center',
   },
   footerText: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#666666',
     textAlign: 'center',
-    marginBottom: 15,
+    marginBottom: 12,
   },
 });
+
