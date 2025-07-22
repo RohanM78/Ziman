@@ -298,16 +298,20 @@ export function EmergencyRecorder({
    */
   const uploadRecording = async (videoUri: string): Promise<string> => {
     try {
-      const downloadURL = await supabaseService.uploadRecording(
-        recordId,
-        videoUri,
-        (progress) => {
-          setState(prev => ({ 
-            ...prev, 
-            uploadProgress: progress.percentage 
-          }));
-        }
-      );
+const fixedUri = Platform.OS !== 'web' && !videoUri.startsWith('file://')
+  ? `file://${videoUri}`
+  : videoUri;
+
+const downloadURL = await supabaseService.uploadRecording(
+  recordId,
+  fixedUri,
+  (progress) => {
+    setState(prev => ({ 
+      ...prev, 
+      uploadProgress: progress.percentage 
+    }));
+  }
+);
 
       return downloadURL;
     } catch (error) {
@@ -437,6 +441,16 @@ export function EmergencyRecorder({
     </View>
   );
 }
+
+
+
+
+
+
+
+
+
+
 
 const styles = StyleSheet.create({
   container: {
