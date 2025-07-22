@@ -60,10 +60,7 @@ export default function AuthLandingScreen() {
 
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeTitle}>Welcome to Your Safety Network</Text>
-          <Text style={styles.welcomeDescription}>
-            Join thousands of users who trust Zicom to keep them safe during emergencies.
-            Get started in seconds.
-          </Text>
+
         </View>
 
         <View style={styles.authOptions}>
