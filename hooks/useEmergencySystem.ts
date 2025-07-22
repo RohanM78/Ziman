@@ -25,9 +25,14 @@ export function useEmergencySystem() {
     setIsEmergencyActive(true);
     setEmergencyProgress(10);
 
-    try {
-      // Ensure user is authenticated
-      await ensureAuthenticated();
+   try {
+  // Ensure user is authenticated
+  await ensureAuthenticated();
+} catch (error) {
+  console.error('Authentication error:', error);
+  Alert.alert('Auth Error', 'Could not verify user authentication.');
+  return;
+}
 
       // Fetch user profile information for contact details
 // Fetch user profile information for contact details
