@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   appName: {
-    fontSize: 48,
+    fontSize: 28,
     fontFamily: 'Inter-Bold',
     color: '#250902',
     marginBottom: 8,
