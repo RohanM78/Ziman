@@ -273,9 +273,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    flexGrow: 1, // enable vertical scroll if content is tall
-    paddingBottom: 100,
-    paddingHorizontal: 24,
+    flexGrow: 1,
+    paddingBottom: 120,
+    paddingTop: 48,
+    paddingHorizontal: 28,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    rowGap: 32,
   },
   loadingContainer: {
     flex: 1,
@@ -289,27 +293,26 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    paddingTop: 48,
-    paddingBottom: 32,
+    marginBottom: 20,
   },
   appTitle: {
-    fontSize: 34,
+    fontSize: 36,
     fontFamily: 'Inter-Bold',
     color: '#250902',
-    marginBottom: 12,
+    marginBottom: 6,
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontFamily: 'Inter-Medium',
     color: '#ad2831',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   warningBanner: {
     backgroundColor: '#FF9800',
-    borderRadius: 8,
+    borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    marginTop: 12,
+    marginTop: 10,
   },
   warningText: {
     fontSize: 14,
@@ -319,13 +322,13 @@ const styles = StyleSheet.create({
   },
   emergencySection: {
     alignItems: 'center',
-    marginBottom: 56,
+    marginBottom: 48,
+    rowGap: 20,
   },
   activeAlert: {
     backgroundColor: '#ad2831',
     borderRadius: 20,
     padding: 24,
-    marginTop: 28,
     marginHorizontal: 16,
     alignItems: 'center',
   },
@@ -365,16 +368,18 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   statusSection: {
-    paddingVertical: 32,
+    paddingVertical: 36,
+    width: '100%',
   },
   sectionTitle: {
     fontSize: 22,
     fontFamily: 'Inter-Bold',
     color: '#250902',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   quickActionsSection: {
-    marginBottom: 48,
+    width: '100%',
+    marginBottom: 60,
   },
   quickActionsText: {
     fontSize: 14,
@@ -383,10 +388,8 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    padding: 18,
+    padding: 20,
     borderLeftWidth: 4,
     borderLeftColor: '#ad2831',
   },
 });
-
-//hi
