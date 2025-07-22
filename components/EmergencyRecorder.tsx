@@ -17,6 +17,7 @@ import Animated, {
   withTiming,
   withSequence,
 } from 'react-native-reanimated';
+import * as FileSystem from 'expo-file-system';
 
 const { width } = Dimensions.get('window');
 
