@@ -273,10 +273,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    minHeight: '150%', // extend content beyond screen height
     paddingHorizontal: 24,
     paddingTop: 32,
-    paddingBottom: 120,
+    paddingBottom: 200,
     backgroundColor: '#FAFAFA',
+    justifyContent: 'flex-start',
   },
   loadingContainer: {
     flex: 1,
@@ -423,4 +425,5 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 });
+
 
