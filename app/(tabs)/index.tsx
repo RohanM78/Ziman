@@ -162,7 +162,7 @@ export default function HomeScreen() {
               <View style={styles.progressContainer}>
                 <View style={styles.progressBar}>
                   <View 
-                    style={[styles.progressFill, { width: `${emergencyProgress}%` }]} 
+                    style={[styles.progressFill, { width: ${emergencyProgress}% }]} 
                   />
                 </View>
                 <Text style={styles.progressText}>{emergencyProgress}%</Text>
@@ -219,9 +219,9 @@ export default function HomeScreen() {
             status={systemStatus.contacts ? 'active' : 'warning'}
             description={
               systemStatus.contacts
-                ? `${settings.emergencyContacts.length} contact${
+                ? ${settings.emergencyContacts.length} contact${
                     settings.emergencyContacts.length > 1 ? 's' : ''
-                  } configured`
+                  } configured
                 : 'Add emergency contacts'
             }
           />
@@ -273,12 +273,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    minHeight: '150%', // extend content beyond screen height
-    paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 200,
-    backgroundColor: '#FAFAFA',
-    justifyContent: 'flex-start',
+    paddingBottom: 100,
   },
   loadingContainer: {
     flex: 1,
@@ -291,32 +286,29 @@ const styles = StyleSheet.create({
     color: '#666666',
   },
   header: {
-    paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 24,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
     alignItems: 'center',
+    paddingTop: 32,
+    paddingHorizontal: 24,
+    marginBottom: 32,
   },
   appTitle: {
-    fontSize: 36,
+    fontSize: 32,
     fontFamily: 'Inter-Bold',
     color: '#250902',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontFamily: 'Inter-Medium',
     color: '#ad2831',
-    marginBottom: 10,
+    marginBottom: 16,
   },
   warningBanner: {
     backgroundColor: '#FF9800',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginTop: 10,
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginTop: 8,
   },
   warningText: {
     fontSize: 14,
@@ -330,25 +322,25 @@ const styles = StyleSheet.create({
   },
   activeAlert: {
     backgroundColor: '#ad2831',
-    borderRadius: 20,
-    padding: 24,
-    marginHorizontal: 16,
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 24,
+    marginHorizontal: 24,
     alignItems: 'center',
-    marginTop: 20,
   },
   activeAlertText: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: 'Inter-Bold',
     color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   activeAlertSubtext: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 18,
+    marginBottom: 16,
   },
   progressContainer: {
     width: '100%',
@@ -372,8 +364,8 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   statusSection: {
-    paddingTop: 32,
-    paddingBottom: 24,
+    paddingHorizontal: 24,
+    marginBottom: 32,
   },
   sectionTitle: {
     fontSize: 22,
@@ -382,48 +374,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   quickActionsSection: {
+    paddingHorizontal: 24,
     marginBottom: 32,
   },
   quickActionsText: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#666666',
-    lineHeight: 22,
+    lineHeight: 20,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    padding: 20,
+    padding: 16,
     borderLeftWidth: 4,
     borderLeftColor: '#ad2831',
   },
-  getStartedSection: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  getStartedText: {
-    fontSize: 16,
-    fontFamily: 'Inter-Regular',
-    color: '#666666',
-    textAlign: 'center',
-    paddingHorizontal: 12,
-  },
-  buttonContainer: {
-    marginTop: 8,
-    marginBottom: 40,
-    alignItems: 'center',
-    rowGap: 16,
-  },
-  footerSection: {
-    paddingTop: 20,
-    paddingBottom: 40,
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: '#666666',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
 });
-
-
