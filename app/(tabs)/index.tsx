@@ -162,7 +162,7 @@ export default function HomeScreen() {
               <View style={styles.progressContainer}>
                 <View style={styles.progressBar}>
                   <View 
-                    style={[styles.progressFill, { width: ${emergencyProgress}% }]} 
+                    style={[styles.progressFill, { width: `${emergencyProgress}%` }]} 
                   />
                 </View>
                 <Text style={styles.progressText}>{emergencyProgress}%</Text>
@@ -219,9 +219,9 @@ export default function HomeScreen() {
             status={systemStatus.contacts ? 'active' : 'warning'}
             description={
               systemStatus.contacts
-                ? ${settings.emergencyContacts.length} contact${
+                ? `${settings.emergencyContacts.length} contact${
                     settings.emergencyContacts.length > 1 ? 's' : ''
-                  } configured
+                  } configured`
                 : 'Add emergency contacts'
             }
           />
