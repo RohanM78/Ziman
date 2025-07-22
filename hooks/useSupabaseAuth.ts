@@ -54,16 +54,17 @@ export function useSupabaseAuth() {
   const signUp = async (email: string, password: string, fullName: string, phoneNumber: string) => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-  data: {
-    full_name: fullName,
-    phone_number: phoneNumber,
+const { data, error } = await supabase.auth.signUp({
+  email,
+  password,
+  options: {
+    data: {
+      full_name: fullName,
+      phone: phoneNumber, // ✅ Add this line
+    },
   },
-},
-      });
+});
+
       
       if (error) throw error;
       
