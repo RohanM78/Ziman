@@ -274,12 +274,13 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    minHeight: '100%',
     paddingBottom: 120,
-    paddingTop: 48,
-    paddingHorizontal: 28,
+    paddingTop: 64,
+    paddingHorizontal: 32,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    rowGap: 32,
+    rowGap: 40,
   },
   loadingContainer: {
     flex: 1,
