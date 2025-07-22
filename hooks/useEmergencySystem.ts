@@ -30,51 +30,54 @@ export function useEmergencySystem() {
       await ensureAuthenticated();
 
       // Fetch user profile information for contact details
-      setEmergencyProgress(15);
-      let userName: string | undefined;
-      let userPhone: string | undefined;
-      
-      try {
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('full_name, phone_number')
-          .single();
-        
-        userName = profile?.full_name || undefined;
-        userPhone = profile?.phone_number || undefined;
-      } catch (error) {
-        console.warn('Failed to fetch user profile:', error);
-        
-    try {
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+// Fetch user profile information for contact details
+setEmergencyProgress(15);
+let userName: string | undefined;
+let userPhone: string | undefined;
 
-  if (userError || !user) {
-    console.warn('Failed to fetch authenticated user:', userError);
-    return;
-  }
-
-  const userName =
-    user.user_metadata?.full_name ||
-    user.email?.split('@')[0] ||
-    'Zicom User';
-
-  const phoneNumber =
-    user.user_metadata?.phone ||
-    null;
-
-  const { error: profileError } = await supabase
+try {
+  const { data: profile } = await supabase
     .from('user_profiles')
-    .upsert({
-      user_id: user.id,
-      full_name: userName,
-      phone_number: phoneNumber,
-    });
+    .select('full_name, phone_number')
+    .single();
 
-  if (profileError) {
-    console.error('Failed to upsert user profile:', profileError);
+  userName = profile?.full_name || undefined;
+  userPhone = profile?.phone_number || undefined;
+} catch (profileError) {
+  console.warn('Failed to fetch user profile:', profileError);
+
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.warn('Failed to fetch authenticated user:', userError);
+    } else {
+      userName =
+        user.user_metadata?.full_name ||
+        user.email?.split('@')[0] ||
+        'Zicom User';
+
+      userPhone =
+        user.user_metadata?.phone ||
+        null;
+
+      const { error: profileUpsertError } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: user.id,
+          full_name: userName,
+          phone_number: userPhone,
+        });
+
+      if (profileUpsertError) {
+        console.error('Failed to upsert user profile:', profileUpsertError);
+      }
+    }
+  } catch (fallbackError) {
+    console.error('Error syncing user metadata to profile:', fallbackError);
   }
-} catch (error) {
-  console.error('Error syncing user metadata to profile:', error);
+}
+nsole.error('Error syncing user metadata to profile:', error);
 }
 
 
