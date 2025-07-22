@@ -58,10 +58,11 @@ export function useSupabaseAuth() {
         email,
         password,
         options: {
-          data: {
-            full_name: fullName,
-          },
-        },
+  data: {
+    full_name: fullName,
+    phone_number: phoneNumber,
+  },
+},
       });
       
       if (error) throw error;
