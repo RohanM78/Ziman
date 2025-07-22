@@ -18,6 +18,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const { settings, saveSettings } = useAppSettings();
   const { permissions, requestLocationPermission, requestCameraPermission, requestMicrophonePermission } = usePermissions();
   const { signOut } = useSupabaseAuth();
