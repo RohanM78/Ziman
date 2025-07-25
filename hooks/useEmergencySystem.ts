@@ -87,7 +87,7 @@ nsole.error('Error syncing user metadata to profile:', error);
 
 
       // Get current location
-      setEmergencyProgress(25);
+     // setEmergencyProgress(25);
       let location;
       try {
         const locationResult = await Location.getCurrentPositionAsync({
