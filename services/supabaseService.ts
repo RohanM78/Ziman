@@ -186,23 +186,22 @@ class SupabaseService {
           throw new Error('Recording file does not exist');
         }
         
-        const base64Data = await FileSystem.readAsStringAsync(fileUri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        
-        // Convert base64 to ArrayBuffer for React Native
-        fileData = Buffer.from(base64Data, 'base64').buffer;
-      }
+        // React Native: Read file and convert to Uint8Array
+const base64Data = await FileSystem.readAsStringAsync(fileUri, {
+  encoding: FileSystem.EncodingType.Base64,
+});
+const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
 
-      // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from('recordings')
-        .upload(fileName, fileData, {
-          contentType: 'video/mp4',
-          upsert: false,
-        });
+// Upload to Supabase Storage
+const { data, error } = await supabase.storage
+  .from('recordings')
+  .upload(fileName, binaryData, {
+    contentType: 'video/mp4',
+    upsert: false,
+  });
 
-      if (error) throw error;
+if (error) throw error;
+
 
       // Get public URL
       const { data: urlData } = supabase.storage
