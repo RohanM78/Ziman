@@ -25,72 +25,64 @@ export function useEmergencySystem() {
     setIsEmergencyActive(true);
     setEmergencyProgress(10);
 
-   try {
-  // Ensure user is authenticated
-  await ensureAuthenticated();
-} catch (error) {
-  console.error('Authentication error:', error);
-  Alert.alert('Auth Error', 'Could not verify user authentication.');
-  return;
-}
+    try {
+      // Ensure user is authenticated
+      await ensureAuthenticated();
 
       // Fetch user profile information for contact details
-// Fetch user profile information for contact details
-setEmergencyProgress(15);
-let userName: string | undefined;
-let userPhone: string | undefined;
+      setEmergencyProgress(15);
+      let userName: string | undefined;
+      let userPhone: string | undefined;
 
-// Attempt 1: Fetch profile
-try {
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('full_name, phone_number')
-    .single();
+      // Attempt 1: Fetch profile
+      try {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('full_name, phone_number')
+          .single();
 
-  userName = profile?.full_name || undefined;
-  userPhone = profile?.phone_number || undefined;
-} catch (profileError) {
-  console.warn('Failed to fetch user profile:', profileError);
-}
-
-// If info is still missing, fallback
-if (!userName || !userPhone) {
-  try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      console.warn('Failed to fetch authenticated user:', userError);
-    } else {
-      userName =
-        user.user_metadata?.full_name ||
-        user.email?.split('@')[0] ||
-        'Zicom User';
-
-      userPhone =
-        user.user_metadata?.phone ||
-        null;
-
-      const { error: profileUpsertError } = await supabase
-        .from('user_profiles')
-        .upsert({
-          user_id: user.id,
-          full_name: userName,
-          phone_number: userPhone,
-        });
-
-      if (profileUpsertError) {
-        console.error('Failed to upsert user profile:', profileUpsertError);
+        userName = profile?.full_name || undefined;
+        userPhone = profile?.phone_number || undefined;
+      } catch (profileError) {
+        console.warn('Failed to fetch user profile:', profileError);
       }
-    }
-  } catch (fallbackError) {
-    console.error('Error syncing user metadata to profile:', fallbackError);
-  }
-}
 
+      // If info is still missing, fallback
+      if (!userName || !userPhone) {
+        try {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
 
+          if (userError || !user) {
+            console.warn('Failed to fetch authenticated user:', userError);
+          } else {
+            userName =
+              user.user_metadata?.full_name ||
+              user.email?.split('@')[0] ||
+              'Zicom User';
+
+            userPhone =
+              user.user_metadata?.phone ||
+              null;
+
+            const { error: profileUpsertError } = await supabase
+              .from('user_profiles')
+              .upsert({
+                user_id: user.id,
+                full_name: userName,
+                phone_number: userPhone,
+              });
+
+            if (profileUpsertError) {
+              console.error('Failed to upsert user profile:', profileUpsertError);
+            }
+          }
+        } catch (fallbackError) {
+          console.error('Error syncing user metadata to profile:', fallbackError);
+        }
+      }
 
       // Get current location
-  setEmergencyProgress(25);
+      setEmergencyProgress(25);
       let location;
       try {
         const locationResult = await Location.getCurrentPositionAsync({
@@ -108,9 +100,9 @@ if (!userName || !userPhone) {
       // Create emergency record in Supabase
       setEmergencyProgress(35);
       const recordId = await supabaseService.createEmergencyRecord(
-        location, 
-        contacts, 
-        userName, 
+        location,
+        contacts,
+        userName,
         userPhone
       );
 
@@ -126,9 +118,6 @@ if (!userName || !userPhone) {
 
       setEmergencyEvent(event);
       setEmergencyProgress(45);
-
-      // Media capture will be handled by EmergencyRecorder component
-      // This allows for real-time progress updates
 
       // Send SMS alerts to emergency contacts
       setEmergencyProgress(85);
@@ -148,8 +137,7 @@ if (!userName || !userPhone) {
       });
 
       setEmergencyEvent(prev => prev ? { ...prev, status: 'completed' } : null);
-    }
-catch (error) {
+    } catch (error) {
       console.error('Emergency system error:', error);
       Alert.alert('Emergency Error', 'Failed to complete emergency protocol. Please call emergency services directly.');
       setIsEmergencyActive(false);
@@ -168,7 +156,7 @@ catch (error) {
     if (emergencyTimeoutRef.current) {
       clearTimeout(emergencyTimeoutRef.current);
     }
-    
+
     if (emergencyEvent?.id) {
       try {
         await supabaseService.updateEmergencyRecord(emergencyEvent.id, {
@@ -178,18 +166,17 @@ catch (error) {
         console.error('Failed to update emergency record:', error);
       }
     }
-    
+
     setIsEmergencyActive(false);
     setEmergencyEvent(prev => prev ? { ...prev, status: 'cancelled' } : null);
     setEmergencyProgress(0);
-    
+
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     }
   }, [emergencyEvent]);
 
   const notifyEmergencyContacts = async (contacts: EmergencyContact[], event: EmergencyEvent) => {
-    // Get user info for emergency message
     let userName = 'A Zicom user';
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -200,14 +187,13 @@ catch (error) {
 
     for (const contact of contacts) {
       try {
-        const locationText = event.location 
+        const locationText = event.location
           ? `https://maps.google.com/?q=${event.location.latitude},${event.location.longitude}`
           : 'Location unavailable';
 
         const message = `🚨 EMERGENCY ALERT from Zicom Safety 🚨\n\n${userName} may need immediate assistance.\n\nTime: ${event.timestamp.toLocaleString()}\nLocation: ${locationText}\n\nThis is an automated emergency message. Please check on them immediately or contact emergency services if needed.`;
 
         if (Platform.OS === 'web') {
-          // Web: Use API route for SMS
           await fetch('/api/send-sms', {
             method: 'POST',
             headers: {
@@ -219,17 +205,15 @@ catch (error) {
             }),
           });
         } else {
-          // Native: Use Expo SMS
           const { SMS } = await import('expo-sms');
           const isAvailable = await SMS.isAvailableAsync();
-          
+
           if (isAvailable) {
             await SMS.sendSMSAsync([contact.phone], message);
           } else {
             console.warn('SMS not available on this device');
           }
         }
-
       } catch (error) {
         console.error(`Failed to notify ${contact.name}:`, error);
       }
@@ -242,7 +226,7 @@ catch (error) {
         await supabaseService.updateEmergencyRecord(emergencyEvent.id, {
           file_url: mediaUrl,
         });
-        
+
         setEmergencyEvent(prev => prev ? {
           ...prev,
           mediaFiles: [mediaUrl],
