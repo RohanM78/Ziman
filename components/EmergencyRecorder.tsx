@@ -82,7 +82,7 @@ export function EmergencyRecorder({
     
     // Cleanup on unmount
     return cleanup;
-  }, []);
+  }, [cameraReady]);
 
   // Pulsing animation for recording indicator
   useEffect(() => {
