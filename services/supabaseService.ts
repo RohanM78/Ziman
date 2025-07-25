@@ -1,6 +1,8 @@
 import { supabase } from '@/config/supabase';
 import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
+// ADD THIS:
+import { Buffer } from 'buffer';
 
 export interface EmergencyRecord {
   id?: string;
@@ -159,71 +161,63 @@ class SupabaseService {
   }
 
   // Media Upload Methods
- // Media Upload Methods
-async uploadRecording(
-  recordId: string,
-  fileUri: string,
-  onProgress?: (progress: UploadProgress) => void
-): Promise<string> {
-  try {
-    const user = await this.getCurrentUser();
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
-
-    const timestamp = Date.now();
-    const fileName = `${user.id}/${timestamp}.mp4`;
-
-    let fileData: any;
-
-    if (Platform.OS === 'web') {
-      // Web: Convert blob URL to ArrayBuffer
-      const response = await fetch(fileUri);
-      fileData = await response.arrayBuffer();
-    } else {
-      // React Native: Read file and convert to Uint8Array
-      const base64Data = await FileSystem.readAsStringAsync(fileUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-      // Convert base64 to binary Uint8Array for upload
-      const binaryString = atob(base64Data);
-      const len = binaryString.length;
-      const bytes = new Uint8Array(len);
-      for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+  async uploadRecording(
+    recordId: string,
+    fileUri: string,
+    onProgress?: (progress: UploadProgress) => void
+  ): Promise<string> {
+    try {
+      const user = await this.getCurrentUser();
+      if (!user) {
+        throw new Error('User not authenticated');
       }
-      fileData = bytes;
-    }
 
-    // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
-      .from('recordings')
-      .upload(fileName, fileData, {
-        contentType: 'video/mp4',
-        upsert: false,
+      const timestamp = Date.now();
+      const fileName = `${user.id}/${timestamp}.mp4`;
+
+      let fileData: any;
+
+      if (Platform.OS === 'web') {
+        // Web: Convert blob URL to ArrayBuffer
+        const response = await fetch(fileUri);
+        fileData = await response.arrayBuffer();
+      } else {
+        // React Native: Read file and convert to Uint8Array using Buffer
+        const base64Data = await FileSystem.readAsStringAsync(fileUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        // Correct conversion on React Native:
+        fileData = Buffer.from(base64Data, 'base64');
+      }
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('recordings')
+        .upload(fileName, fileData, {
+          contentType: 'video/mp4',
+          upsert: false,
+        });
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('recordings')
+        .getPublicUrl(fileName);
+
+      const publicUrl = urlData.publicUrl;
+
+      // Update emergency record with file URL
+      await this.updateEmergencyRecord(recordId, {
+        file_url: publicUrl,
       });
 
-    if (error) throw error;
-
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from('recordings')
-      .getPublicUrl(fileName);
-
-    const publicUrl = urlData.publicUrl;
-
-    // Update emergency record with file URL
-    await this.updateEmergencyRecord(recordId, {
-      file_url: publicUrl,
-    });
-
-    return publicUrl;
-  } catch (error) {
-    console.error('Failed to upload recording:', error);
-    throw error;
+      return publicUrl;
+    } catch (error) {
+      console.error('Failed to upload recording:', error);
+      throw error;
+    }
   }
-}
-
 
   // Query Methods
   async getUserEmergencyRecords(userId: string): Promise<EmergencyRecord[]> {
