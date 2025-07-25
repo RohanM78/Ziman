@@ -1,7 +1,6 @@
 if (typeof global !== "undefined" && typeof global.Buffer === "undefined") {
   global.Buffer = require("buffer").Buffer;
 }
-
 import { Tabs } from 'expo-router';
 import { Shield, Users, Settings } from 'lucide-react-native';
 
