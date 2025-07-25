@@ -205,7 +205,7 @@ export function EmergencyRecorder({
     }
 
     // Start recording with 10-second limit
-    const video = await cameraRef.current.recordAsync({
+    const recordingPromise = cameraRef.current.recordAsync({
       maxDuration: 10,
       quality: '720p',
     });
