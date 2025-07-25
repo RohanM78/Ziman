@@ -220,6 +220,7 @@ export function EmergencyRecorder({
         console.warn('Error stopping recording:', error);
       }
     }, 10000);
+    const video = await recordingPromise;
 
     return video.uri;
   };
