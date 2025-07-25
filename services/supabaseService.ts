@@ -3,7 +3,9 @@ import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 // ADD THIS:
 import { Buffer } from 'buffer';
-
+if (typeof global !== 'undefined' && (global as any).Buffer === undefined) {
+  (global as any).Buffer = Buffer;
+}
 export interface EmergencyRecord {
   id?: string;
   user_id: string;
