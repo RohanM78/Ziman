@@ -54,6 +54,7 @@ export function EmergencyRecorder({
 
   // Refs for camera and timers
   const cameraRef = useRef<CameraView | null>(null);
+  const [cameraReady, setCameraReady] = useState(false);
   const recordingTimer = useRef<NodeJS.Timeout | null>(null);
   const progressTimer = useRef<NodeJS.Timeout | null>(null);
 
