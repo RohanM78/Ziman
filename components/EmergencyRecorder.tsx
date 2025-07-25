@@ -76,7 +76,9 @@ export function EmergencyRecorder({
 
   // Auto-start recording when component mounts
   useEffect(() => {
-    startEmergencyRecording();
+  if (cameraReady) {
+      startEmergencyRecording();
+    }
     
     // Cleanup on unmount
     return cleanup;
