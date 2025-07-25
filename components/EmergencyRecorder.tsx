@@ -347,6 +347,8 @@ export function EmergencyRecorder({
           ref={cameraRef}
           style={styles.camera}
           facing="back"
+          onCameraReady={() => setCameraReady(true)}
+
         />
       )}
 
