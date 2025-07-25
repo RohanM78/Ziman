@@ -221,7 +221,6 @@ export function EmergencyRecorder({
       }
     }, 10000);
     const video = await recordingPromise;
-
     return video.uri;
   };
 
