@@ -143,8 +143,8 @@ try {
       });
 
       setEmergencyEvent(prev => prev ? { ...prev, status: 'completed' } : null);
-
-     catch (error) {
+    }
+catch (error) {
       console.error('Emergency system error:', error);
       Alert.alert('Emergency Error', 'Failed to complete emergency protocol. Please call emergency services directly.');
       setIsEmergencyActive(false);
