@@ -81,7 +81,7 @@ try {
   } catch (fallbackError) {
     console.error('Error syncing user metadata to profile:', fallbackError);
   }
-
+}
 
 
       // Get current location
