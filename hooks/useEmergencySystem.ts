@@ -40,6 +40,7 @@ setEmergencyProgress(15);
 let userName: string | undefined;
 let userPhone: string | undefined;
 
+// Attempt 1: Fetch profile
 try {
   const { data: profile } = await supabase
     .from('user_profiles')
@@ -50,7 +51,10 @@ try {
   userPhone = profile?.phone_number || undefined;
 } catch (profileError) {
   console.warn('Failed to fetch user profile:', profileError);
+}
 
+// If info is still missing, fallback
+if (!userName || !userPhone) {
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -82,6 +86,7 @@ try {
     console.error('Error syncing user metadata to profile:', fallbackError);
   }
 }
+
 
 
       // Get current location
