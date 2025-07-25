@@ -217,8 +217,8 @@ class SupabaseService {
       });
 
       return publicUrl;
-      
-    } catch (error) {
+    } 
+    catch (error) {
       console.error('Failed to upload recording:', error);
       throw error;
     }
