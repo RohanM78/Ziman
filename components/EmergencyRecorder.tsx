@@ -237,7 +237,7 @@ export function EmergencyRecorder({
       } catch (error) {
         console.warn('Error stopping recording:', error);
       }
-    }, 10000);
+    }, 12000);
     const video = await recordingPromise;
         if (recordingTimer.current) {
       clearTimeout(recordingTimer.current);
