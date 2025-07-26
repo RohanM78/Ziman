@@ -7,7 +7,8 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
-import { CameraView, CameraType } from 'expo-camera';
+import { CameraView } from 'expo-camera';
+import { Audio } from 'expo-av';
 import { Video, Upload, CircleAlert as AlertCircle, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { supabaseService } from '@/services/supabaseService';
 import Animated, {
