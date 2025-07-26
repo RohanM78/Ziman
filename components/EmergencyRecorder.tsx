@@ -239,7 +239,11 @@ export function EmergencyRecorder({
       }
     }, 12000);
     const video = await recordingPromise;
-        if (recordingTimer.current) {
+
+    // Give the OS a moment to finalize the file on disk
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (recordingTimer.current) {
       clearTimeout(recordingTimer.current);
       recordingTimer.current = null;
     }
