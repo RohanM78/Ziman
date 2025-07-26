@@ -37,7 +37,7 @@ interface RecordingState {
   completed: boolean;
 }
 
-export function EmergencyRecorder({ 
+export function EmergencyRecorder({
   recordId, 
   onRecordingComplete, 
   onError,
