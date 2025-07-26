@@ -237,7 +237,7 @@ export function EmergencyRecorder({
       } catch (error) {
         console.warn('Error stopping recording:', error);
       }
-    }, 12000);
+    }, 16000);
     const video = await recordingPromise;
 
     // Give the OS a moment to finalize the file on disk
