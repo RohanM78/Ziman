@@ -239,6 +239,11 @@ export function EmergencyRecorder({
       }
     }, 10000);
     const video = await recordingPromise;
+        if (recordingTimer.current) {
+      clearTimeout(recordingTimer.current);
+      recordingTimer.current = null;
+    }
+
     return video.uri;
   };
 
