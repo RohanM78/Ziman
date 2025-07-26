@@ -213,6 +213,14 @@ export function EmergencyRecorder({
     if (!cameraRef.current) {
       throw new Error('Camera reference not available');
     }
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+    } catch (error) {
+      console.warn('Failed to set audio mode:', error);
+    }
 
     // Start recording with 10-second limit
     const recordingPromise = cameraRef.current.recordAsync({
