@@ -77,10 +77,16 @@ export function EmergencyRecorder({
 
   // Auto-start recording when component mounts
   useEffect(() => {
-  if (cameraReady) {
-      startEmergencyRecording();
-    }
-    
+    if (cameraReady) {
+      const delayId = setTimeout(() => {
+        startEmergencyRecording();
+      }, 1000); // extra delay for camera stability
+
+      return () => {
+        clearTimeout(delayId);
+        cleanup();
+      };
+    }      
     // Cleanup on unmount
     return cleanup;
   }, [cameraReady]);
